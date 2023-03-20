@@ -4,10 +4,11 @@ import uuid
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from djoser import serializers as dj_serializers
+from rest_framework import serializers
+
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
                             RecipeIngredient, RecipeInShoppingCart,
                             Subscription, Tag, TagRecipe)
-from rest_framework import serializers
 
 User = get_user_model()
 
@@ -133,8 +134,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         user = request.user
         if not user or user.is_anonymous:
             return False
-        queryset = RecipeInShoppingCart.objects.all()
-        return queryset.filter(recipe=obj, user=user).exists()
+        return RecipeInShoppingCart.objects.filter(
+            recipe=obj,
+            user=user
+        ).exists()
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')

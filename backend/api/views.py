@@ -1,5 +1,14 @@
 import logging
-from collections import defaultdict
+
+from django.contrib.auth import get_user_model
+from django.db.models import Sum
+from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
+from djoser import views as dj_views
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import PageLimitPagination
@@ -8,20 +17,13 @@ from api.permissions import (IsAuthenticated, IsAuthenticatedOrReadOnly,
 from api.serializers import (IngredientSerializer, RecipeCreateSerializer,
                              RecipeSerializer, ShortRecipeSerializer,
                              TagSerializer, UserWithRecipesSerializer)
-from django.contrib.auth import get_user_model
-from django.http import HttpResponse
-from django_filters.rest_framework import DjangoFilterBackend
-from djoser import views as dj_views
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
                             RecipeIngredient, RecipeInShoppingCart,
                             Subscription, Tag)
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
-from rest_framework.generics import get_object_or_404
-from rest_framework.response import Response
 
 User = get_user_model()
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -110,56 +112,50 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if self.action == 'create':
-            return RecipeCreateSerializer
-        if self.action == 'update':
-            return RecipeCreateSerializer
-        if self.action == 'partial_update':
+        actions = ['create', 'update', 'partial_update']
+        if self.action in actions:
             return RecipeCreateSerializer
         return super().get_serializer_class()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=False,
-            url_path='download_shopping_cart',
-            permission_classes=[IsAuthenticated],
-            )
+    @action(
+        detail=False,
+        url_path='download_shopping_cart',
+        permission_classes=[IsAuthenticated],
+    )
     def download_shopping_cart(self, request):
-        recipes_in_shopping_cart = RecipeInShoppingCart.objects.filter(
-            user=request.user
-        ).all()
-        shopping_list = defaultdict(int)
-
-        for recipe_in_shopping_cart in recipes_in_shopping_cart:
-            recipe_ingredients = RecipeIngredient.objects.filter(
-                recipe=recipe_in_shopping_cart.recipe
-            ).all()
-
-            for recipe_ingredient in recipe_ingredients:
-                shopping_list[
-                    (
-                        recipe_ingredient.ingredient.name,
-                        recipe_ingredient.ingredient.measurement_unit,
-                    )
-                ] += recipe_ingredient.amount
+        recipe_ingredients = RecipeIngredient.objects.filter(
+            recipe__recipeinshoppingcart__user=request.user
+        ).values(
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(
+            total=Sum('amount')
+        ).order_by()
 
         output = ''
-        for key, value in shopping_list.items():
-            output += f'{key[0]} ({key[1]}) — {value}\n'
+        for recipe_ingredient in recipe_ingredients:
+            output += (
+                f'{recipe_ingredient["ingredient__name"]}'
+                f'({recipe_ingredient["ingredient__measurement_unit"]}) — '
+                f'{recipe_ingredient["total"]}\n'
+            )
 
         file_name = 'foodgram_shopping_cart'
         response = HttpResponse(output, content_type='text/plain')
         response['Content-Disposition'] = (
             f'attachment; filename="{file_name}.txt"'
-            )
+        )
         return response
 
     @staticmethod
     def create_relation_recipe_with_user(model, recipe, user, request):
         try:
             instance = model.objects.create(recipe=recipe, user=user)
-        except status.HTTP_403_FORBIDDEN:
+        except Exception as ex:
+            logger.error(f'Ошибка: {ex}')
             return Response(status=status.HTTP_400_BAD_REQUEST)
         context = {'request': request}
         serializer = ShortRecipeSerializer(instance.recipe, context=context)
@@ -170,7 +166,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         try:
             instance = model.objects.get(recipe=recipe, user=user)
         except Exception as ex:
-            logger.debug(f'Ошибка: {ex}')
+            logger.error(f'Ошибка: {ex}')
             return Response(status=status.HTTP_400_BAD_REQUEST)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
