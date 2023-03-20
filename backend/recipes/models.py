@@ -139,31 +139,6 @@ class Recipe(models.Model):
         return f'{self.name}'
 
 
-class TagRecipe(models.Model):
-    tag = models.ForeignKey(
-        Tag,
-        on_delete=models.RESTRICT,
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-    )
-
-    class Meta:
-        verbose_name = 'Тег рецепта'
-        verbose_name_plural = 'Теги рецепта'
-        ordering = ['tag', 'recipe']
-        constraints = [
-            models.UniqueConstraint(
-                fields=['tag', 'recipe'],
-                name='%(app_label)s_%(class)s_unique_relationships',
-            ),
-        ]
-
-    def __str__(self):
-        return f'{self.tag} {self.recipe}'
-
-
 class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,

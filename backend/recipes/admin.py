@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.db.models import Count
 
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
-                            RecipeIngredient, RecipeInShoppingCart, Tag,
-                            TagRecipe)
+                            RecipeIngredient, RecipeInShoppingCart, Tag
+                            )
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -44,11 +44,6 @@ class RecipeIngredientInline(admin.TabularInline):
     min_num = 1
 
 
-class RecipeTagInline(admin.TabularInline):
-    model = TagRecipe
-    extra = 1
-
-
 class RecipeInShoppingCartInline(admin.TabularInline):
     model = RecipeInShoppingCart
     extra = 1
@@ -78,7 +73,6 @@ class RecipeAdmin(admin.ModelAdmin):
 
     inlines = [
         RecipeIngredientInline,
-        RecipeTagInline,
         RecipeInShoppingCartInline,
         FavoriteRecipeInline,
     ]

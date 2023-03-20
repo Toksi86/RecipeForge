@@ -8,7 +8,7 @@ from rest_framework import serializers
 
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
                             RecipeIngredient, RecipeInShoppingCart,
-                            Subscription, Tag, TagRecipe)
+                            Subscription, Tag)
 
 User = get_user_model()
 
@@ -192,16 +192,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             recipe_ingredients.append(recipe_ingredient)
         RecipeIngredient.objects.bulk_create(recipe_ingredients)
 
-    def create_related_tags(self, recipe, tags_data):
-        recipe_tags = []
-        for tag_data in tags_data:
-            recipe_tag = TagRecipe(
-                recipe=recipe,
-                tag=tag_data,
-            )
-            recipe_tags.append(recipe_tag)
-        TagRecipe.objects.bulk_create(recipe_tags)
-
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
         tags_data = validated_data.pop('tags')
@@ -209,13 +199,12 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         instance = super().create(validated_data)
 
         self.create_related_ingredients(instance, ingredients_data)
-        self.create_related_tags(instance, tags_data)
+        instance.tags.set(tags_data)
 
         return instance
 
     def update(self, instance, validated_data):
         RecipeIngredient.objects.filter(recipe=instance).delete()
-        TagRecipe.objects.filter(recipe=instance).delete()
 
         ingredients_data = validated_data.pop('ingredients')
         tags_data = validated_data.pop('tags')
@@ -223,7 +212,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         instance = super().update(instance, validated_data)
 
         self.create_related_ingredients(instance, ingredients_data)
-        self.create_related_tags(instance, tags_data)
+        instance.tags.set(tags_data)
 
         return instance
 
