@@ -126,10 +126,6 @@ DJOSER = {
     'HIDE_USERS': False,
 }
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8080',
-]
-
 CORS_URLS_REGEX = r'^/api/.*$'
 
 LOGGING = {
