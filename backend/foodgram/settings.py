@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-59f##&=7i!%z61g7v*xtq(pxbzmey(&z3l^!4$h@e0b(obdr%r'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['158.160.58.211', 'backend']
 
@@ -127,7 +127,23 @@ DJOSER = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost',
+    'http://localhost:8080',
 ]
 
 CORS_URLS_REGEX = r'^/api/.*$'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'DEBUG' if DEBUG else 'ERROR',
+            'handlers': ['console', ],
+        },
+    },
+}
