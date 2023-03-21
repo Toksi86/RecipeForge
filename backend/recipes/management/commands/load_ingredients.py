@@ -24,4 +24,4 @@ class Command(BaseCommand):
             for ingredient in ingredients:
                 Ingredient.objects.get_or_create(**ingredient)
 
-        logger.info('Загрузка прошла успешно.')
+        logger.info('Загрузка прошла успешно!')
