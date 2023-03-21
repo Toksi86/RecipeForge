@@ -54,7 +54,6 @@ jobs:
             key: ${{ secrets.SSH_KEY }}
             passphrase: ${{ secrets.PASSPHRASE }}
             script: |
-              cd foodgram
               sudo docker pull toksi86/foodgram_backend:latest
               sudo docker pull toksi86/foodgram_frontend:v1
               sudo docker-compose stop
