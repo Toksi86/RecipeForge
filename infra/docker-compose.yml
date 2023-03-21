@@ -9,7 +9,7 @@ services:
       - ./.env
 
   frontend:
-    image: toksi86/foodgram_frontend:v1
+    image: toksi86/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
