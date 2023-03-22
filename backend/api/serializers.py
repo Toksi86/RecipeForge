@@ -6,9 +6,11 @@ from django.core.files.base import ContentFile
 from djoser import serializers as dj_serializers
 from rest_framework import serializers
 
-from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
-                            RecipeIngredient, RecipeInShoppingCart,
-                            Subscription, Tag)
+from recipes.models import (
+    FavoriteRecipe, Ingredient, Recipe,
+    RecipeIngredient, RecipeInShoppingCart,
+    Subscription, Tag
+)
 
 User = get_user_model()
 

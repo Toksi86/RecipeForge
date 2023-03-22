@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-59f##&=7i!%z61g7v*xtq(pxbzmey(&z3l^!4$h@e0b(obdr%r
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['158.160.58.211', 'backend']
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -125,8 +125,6 @@ DJOSER = {
     },
     'HIDE_USERS': False,
 }
-
-CORS_URLS_REGEX = r'^/api/.*$'
 
 LOGGING = {
     'version': 1,

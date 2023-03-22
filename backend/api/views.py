@@ -12,14 +12,20 @@ from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import PageLimitPagination
-from api.permissions import (IsAuthenticated, IsAuthenticatedOrReadOnly,
-                             IsAuthorOrReadOnly)
-from api.serializers import (IngredientSerializer, RecipeCreateSerializer,
-                             RecipeSerializer, ShortRecipeSerializer,
-                             TagSerializer, UserWithRecipesSerializer)
-from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
-                            RecipeIngredient, RecipeInShoppingCart,
-                            Subscription, Tag)
+from api.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+    IsAuthorOrReadOnly)
+from api.serializers import (
+    IngredientSerializer, RecipeCreateSerializer,
+    RecipeSerializer, ShortRecipeSerializer,
+    TagSerializer, UserWithRecipesSerializer
+)
+from recipes.models import (
+    FavoriteRecipe, Ingredient, Recipe,
+    RecipeIngredient, RecipeInShoppingCart,
+    Subscription, Tag
+)
 
 User = get_user_model()
 
@@ -40,10 +46,11 @@ class UserViewSet(dj_views.UserViewSet):
         subscriptions = User.objects.filter(subscribers__user=request.user)
         pages = self.paginate_queryset(subscriptions)
         context = {'request': request}
-        serializer = UserWithRecipesSerializer(pages,
-                                               many=True,
-                                               context=context
-                                               )
+        serializer = UserWithRecipesSerializer(
+            pages,
+            many=True,
+            context=context
+        )
         return self.get_paginated_response(serializer.data)
 
     @staticmethod
@@ -54,9 +61,10 @@ class UserViewSet(dj_views.UserViewSet):
             logger.debug(f'Ошибка: {ex}')
             return Response(status=status.HTTP_400_BAD_REQUEST)
         context = {'request': request}
-        serializer = UserWithRecipesSerializer(instance.author,
-                                               context=context
-                                               )
+        serializer = UserWithRecipesSerializer(
+            instance.author,
+            context=context
+        )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @staticmethod
