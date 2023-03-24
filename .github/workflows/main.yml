@@ -55,7 +55,7 @@ jobs:
             passphrase: ${{ secrets.PASSPHRASE }}
             script: |
               sudo docker pull toksi86/foodgram_backend:latest
-              sudo docker pull toksi86/foodgram_frontend:v3
+              sudo docker pull toksi86/foodgram_frontend:latest
               sudo docker-compose stop
               sudo docker-compose rm backend
               sudo docker-compose rm frontend
